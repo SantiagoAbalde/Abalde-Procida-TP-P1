@@ -10,48 +10,50 @@ import entorno.Herramientas;
 
 public class Juego extends InterfaceJuego {
     private Entorno entorno;
-    Cuadricula cua;
-    Regalo[] regalos;
-    Planta[] plantas;
-    ZombieGrinch[] zombis;
+    Cuadricula cua; //objeto de tipo cuadricula
+    Regalo[] regalos; //arreglo de objetos de tipo regalo
+    Planta[] plantas; //arreglo de objetos de tipo planta
+    ZombieGrinch[] zombis; //arreglo de objetos de tipo zombiegrinch
 
-    // --- Control general del juego ---
-    int totalZombis = 50;
-    int zombisEliminados = 0;
-    int zombisActivos = 0;
-    boolean juegoTerminado = false;
-    boolean gano = false;
+    //Control de juego//
+    int totalZombis = 50; //cantidad de zombies a eliminar
+    int zombisEliminados = 0; //contador de la cantidad de zombies eliminados
+    int zombisActivos = 0; //cantidad de zombies en mapa
+    boolean juegoTerminado = false; //variable booleana que controla el estado del juego
+    boolean gano = false; //variable booleana que controla la condicion de victoria
 
-    // --- Sistema de recarga del banco de plantas ---
-    boolean recargandoPlanta = false;
-    int tiempoRecargaPlanta = 300;
-    int contadorRecargaPlanta = 0;
+    //Variables utilizadas para el cooldown//
+    boolean recargandoPlanta = false; //variable booleana para saber si la planta esta en modo de recarga
+    int tiempoRecargaPlanta = 300; //indica cuanto dura el cooldown, a 60 ticks/segundo (300/60 = 5 seg)
+    int contadorRecargaPlanta = 0; //contador de los ticks
 
-    // --- Imágenes del banco ---
-    Image imagenPlantaNormal;
-    Image imagenPlantaCooldown;
+    //imagenes de las plantas//
+    Image imagenPlantaNormal; //la planta sin recarga
+    Image imagenPlantaCooldown; //planta recargando, bloqueada
 
     public Juego() {
-        this.entorno = new Entorno(this, "La invasión del Grinch Zombie", 800, 600);
-        cua = new Cuadricula(50, 150, entorno);
+        this.entorno = new Entorno(this, "La invasión del Grinch Zombie", 800, 600); //Crea el entorno con titulo y resolucion
+        cua = new Cuadricula(50, 150, entorno); //Se crea la cuadricula en la posicion (50,150)
 
         regalos = new Regalo[5];
         for (int i = 0; i < 5; i++) {
-            regalos[i] = new Regalo(50, 150 + i * 100, entorno);
+            regalos[i] = new Regalo(50, 150 + i * 100, entorno); //Se crean los regalos verticalmente sobre el eje Y separados por 100 pixeles
         }
 
         plantas = new Planta[15];
-        plantas[0] = new Planta(50, 50, entorno);
+        plantas[0] = new Planta(50, 50, entorno); //inicializa las plantas, tenemos 15 disponibles para usar en el mapa y se ubica la primera en (50/50)
 
-        zombis = new ZombieGrinch[15];
+        zombis = new ZombieGrinch[15]; //cantidad de zombies activos = 15
 
         imagenPlantaNormal = Herramientas.cargarImagen("planta.png");
-        imagenPlantaCooldown = Herramientas.cargarImagen("plantaCooldown.png");
+        imagenPlantaCooldown = Herramientas.cargarImagen("plantaCooldown.png"); //Las imagenes necesarias para las plantas
 
-        this.entorno.iniciar();
+        this.entorno.iniciar(); //comienza el ciclo de juego
     }
 
     public void tick() {
+    	
+    	//Control de mfinalizacion de juego///////////////////////////////////
         if (juegoTerminado) {
             entorno.cambiarFont("Arial", 40, Color.WHITE);
             if (gano)
@@ -60,12 +62,12 @@ public class Juego extends InterfaceJuego {
                 entorno.escribirTexto("¡LOS ZOMBIES GANARON!", 220, 300);
             return;
         }
+        //////////////////////////////////////////////////////////////////////
+        
+        cua.dibujar(); //Dibujo de cuadricula
+        for (Regalo r : regalos) r.dibujar(); //Dibujo de los regalos
 
-        // --- DIBUJAR ESCENARIO ---
-        cua.dibujar();
-        for (Regalo r : regalos) r.dibujar();
-
-        // --- DIBUJAR TODAS LAS PLANTAS ---
+        //Dibujo de las plantas y actualizacion de su estado////////////////////
         for (Planta p : plantas) {
             if (p != null) {
                 p.dibujar();
@@ -73,7 +75,7 @@ public class Juego extends InterfaceJuego {
             }
         }
 
-        // --- SELECCIONAR PLANTA ---
+        //SELECCION DE PLANTAS//////////////////////////////////////////////////
         if (entorno.sePresionoBoton(entorno.BOTON_IZQUIERDO)) {
             boolean clicEnPlanta = false;
 
@@ -93,6 +95,7 @@ public class Juego extends InterfaceJuego {
                 }
             }
         }
+        /////////////////////////////////////////////////////////////////////////
 
         // --- ARRASTRAR SOLO PLANTAS NO PLANTADAS ---
         if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
@@ -102,8 +105,9 @@ public class Juego extends InterfaceJuego {
                 }
             }
         }
+        ///////////////////////////////////////////////////////////////////////
 
-        // --- SOLTAR PLANTA ---
+        //Soltar planta
         if (entorno.seLevantoBoton(entorno.BOTON_IZQUIERDO)) {
             for (Planta p : plantas) {
                 if (p != null && p.seleccionada && !p.plantada) {
@@ -129,8 +133,9 @@ public class Juego extends InterfaceJuego {
                 }
             }
         }
+        ////////////////////////////////////////////////////////////////////////////
         
-     // --- MOVER PLANTA SELECCIONADA CON W/A/S/D ---
+     //Mover planta seleccionada con (W/A/S/D)/////////////////////////////////////
         for (Planta p : plantas) {
             if (p != null && p.plantada && p.seleccionada) {
                 // Obtener la posición actual en la cuadrícula
@@ -138,7 +143,7 @@ public class Juego extends InterfaceJuego {
                 int col = celda.x;
                 int fila = celda.y;
 
-                // --- W: mover arriba ---
+                //W = arriba
                 if (entorno.sePresiono('W')) {
                     if (fila > 0 && !cua.ocupado[col][fila - 1]) {
                         p.y -= 100;
@@ -147,7 +152,7 @@ public class Juego extends InterfaceJuego {
                     }
                 }
 
-                // --- S: mover abajo ---
+                // S = abajo
                 if (entorno.sePresiono('S')) {
                     if (fila < 4 && !cua.ocupado[col][fila + 1]) {
                         p.y += 100;
@@ -156,7 +161,7 @@ public class Juego extends InterfaceJuego {
                     }
                 }
 
-                // --- A: mover izquierda ---
+                // A = izquierda
                 if (entorno.sePresiono('A')) {
                     if (col > 0 && !cua.ocupado[col - 1][fila]) {
                         p.x -= 100;
@@ -165,7 +170,7 @@ public class Juego extends InterfaceJuego {
                     }
                 }
 
-                // --- D: mover derecha ---
+                // D = derecha
                 if (entorno.sePresiono('D')) {
                     if (col < 7 && !cua.ocupado[col + 1][fila]) {
                         p.x += 100;
@@ -175,9 +180,10 @@ public class Juego extends InterfaceJuego {
                 }
             }
         }
+        /////////////////////////////////////////////////////////////////////////////////////////
 
 
-        // --- COOLDOWN DEL BANCO ---
+        //Cooldown de las plantas////////////////////////////////////////////////////////////////
         if (recargandoPlanta) {
             entorno.dibujarImagen(imagenPlantaCooldown, 50, 50, 0, 1);
             entorno.cambiarFont("Arial", 14, Color.WHITE);
@@ -202,13 +208,15 @@ public class Juego extends InterfaceJuego {
         } else {
             entorno.dibujarImagen(imagenPlantaNormal, 50, 50, 0, 1);
         }
+        //////////////////////////////////////////////////////////////////////////////////////////
 
-        // --- CREAR NUEVAS PLANTAS ---
+        //Creacion nuevas plantas/////////////////////////////////////////////////////////////////
         if (!plantasNoPlantadas(plantas) && !recargandoPlanta) {
             crearPlanta(plantas);
         }
+        //////////////////////////////////////////////////////////////////////////////////////////
 
-        // --- ZOMBIES ---
+        //Generacion de zombies//////////////////////////////////////////////////////////////////
         if (zombisActivos < 15 && zombisEliminados + zombisActivos < totalZombis) {
             if (Math.random() < 0.02) {
                 for (int i = 0; i < zombis.length; i++) {
@@ -221,14 +229,16 @@ public class Juego extends InterfaceJuego {
                 }
             }
         }
-
+        ////////////////////////////////////////////////////////////////////////////////////////
+        
+        //Dibujo y comportamiento de los zombies///////////////////////////////////////////////
         for (int i = 0; i < zombis.length; i++) {
             ZombieGrinch z = zombis[i];
             if (z != null) {
                 z.mover();
                 z.dibujar();
 
-                // Colisión con proyectiles
+                //Colision con proyectil
                 for (Planta p : plantas) {
                     if (p != null && p.proyectiles != null) {
                         for (int j = 0; j < p.proyectiles.length; j++) {
@@ -247,7 +257,7 @@ public class Juego extends InterfaceJuego {
                     }
                 }
 
-                // Colisión ZOMBIE vs PLANTA
+                //Colision con planta
                 for (int j = 0; j < plantas.length; j++) {
                     if (plantas[j] != null && colisionZombiePlanta(z, plantas[j])) {
                         Point celda = cua.cercano(plantas[j].x, plantas[j].y);
@@ -264,16 +274,23 @@ public class Juego extends InterfaceJuego {
                 }
             }
         }
-
+        //////////////////////////////////////////////////////////////////////////////////
+        
+        //Control de condicion de victoria o derrota/////////////////////////////////////
         if (zombisEliminados >= totalZombis) {
             juegoTerminado = true;
             gano = true;
         }
-
+        ////////////////////////////////////////////////////////////////////////////////
+        
+        //Progreso del juego///////////////////////////////////////////////////////////
         entorno.cambiarFont("Arial", 18, Color.WHITE);
         entorno.escribirTexto("Zombies eliminados: " + zombisEliminados, 550, 30);
         entorno.escribirTexto("Zombies restantes: " + (totalZombis - zombisEliminados), 550, 50);
     }
+    //Final de tick()/////////////////////////////////////////////////////////////////////////
+    
+    
 
     public boolean plantasNoPlantadas(Planta[] pl) {
         for (Planta p : pl) {

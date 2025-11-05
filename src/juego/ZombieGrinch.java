@@ -17,7 +17,7 @@ public class ZombieGrinch {
         this.x = x;
         this.y = y;
         this.entorno = entorno;
-        this.velocidad = 0.1;
+        this.velocidad = 0.2;
         this.vida = 2;
         this.escala = 0.14; // 🔹 Ajustá este valor para cambiar tamaño
         this.imagen = Herramientas.cargarImagen("zombieGrinch.png");
@@ -47,8 +47,5 @@ public class ZombieGrinch {
         return this.x < 100;
     }
 
-	public void recibirDanio() {
-		// TODO Auto-generated method stub
-		
-	}
+	
 }
