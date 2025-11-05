@@ -6,10 +6,7 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class Regalo {
-	private double x;
-	double y;
-	double escala;
-	double angulo;
+	double x,y, escala,angulo;
 	Entorno e;
 	Image regalo;
 	boolean sentido;
@@ -31,11 +28,7 @@ public class Regalo {
 		this.angulo += (sentido?1:-1)*Math.random()/70.0;
 		e.dibujarImagen(regalo, this.x, this.y, this.angulo, this.escala);
 	}
-	
-
 }
-
-
 
 
 
